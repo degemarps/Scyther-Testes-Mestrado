@@ -1,0 +1,57 @@
+hashfunction H;
+
+const XOR:Function;
+const CON:Function;
+
+macro HRi=H(Ri);
+macro HSid=H(Sid);
+
+macro InitKey1=XOR(PreKey,Rkey1);
+macro HInitKey1=H(CON(Rkey1,PreKey));
+
+macro InitKey2=XOR(PreKey,Rkey2);
+macro InitKey3=XOR(PreKey,Rkey3);
+macro HInitKey2=H(CON(InitKey2,InitKey3,Rkey1,Rkey2,Rkey3));
+
+macro KeyPart1=XOR(Rkey1,Rkey2);
+macro KeyPart2=XOR(Rkey1,Rkey3);
+macro Key=CON(KeyPart1,KeyPart2);
+macro HKey=H(Key);
+
+protocol criacaoChave(X,Y){
+
+	role X{
+	secret Login, Password, ID, PreKey, Ri, Sid;
+	fresh Rkey2, Rkey3;
+	var Rkey1;
+
+	recv_1(Y, X, HRi);
+	send_2(X, Y,HSid);
+	recv_3(Y,X,InitKey1,HInitKey1);
+	send_4(X,Y,InitKey2,InitKey3,HInitKey2);
+	recv_5(Y,X,HKey);
+
+	claim(X,Niagree);
+	claim(X,Nisynch);
+	claim(X,Alive);
+	claim(X,Weakagree);
+	}
+
+
+	role Y{	
+	secret Login, Password, ID, PreKey, Ri, Sid;
+	fresh Rkey1;
+	var Rkey2, Rkey3;
+
+	send_1(Y, X, HRi);
+	recv_2(X, Y,HSid);
+	send_3(Y,X,InitKey1,HInitKey1);
+	recv_4(X,Y,InitKey2,InitKey3,HInitKey2);
+	send_5(Y,X,HKey);
+
+	claim(Y,Niagree);
+	claim(Y,Nisynch);
+	claim(Y,Alive);
+	claim(Y,Weakagree);
+	}
+}

@@ -1,0 +1,52 @@
+hashfunction H;
+usertype String;
+
+const HELLO:String;
+
+const XOR:Function;
+const CON:Function;
+const PUF:Function;
+const kir:Function;
+
+macro Ri=PUF(Ci);
+macro KeyAccess=H(CON(PreLogin,PrePass));
+
+macro CLog=XOR(PreLogin,Rs1);
+macro CPass=XOR(PrePass,Rs2);
+macro Cid=H(CON(PreLogin,PrePass,Rs1,Rs2));
+
+protocol setup (S, C) {
+	role S{
+	secret PreLogin, PrePass;
+	fresh Ci, Sid, Rs1, Rs2;
+
+	recv_1(C, S, HELLO);
+	send_2(S, C, { Ci }kir);
+	recv_3(C, S, { Ri }kir);
+	send_4(S, C, { Sid }kir);
+	recv_5(C, S, KeyAccess);
+	send_6(S, C, CLog, CPass, Cid);
+
+	claim(S,Niagree);
+	claim(S,Nisynch);
+	claim(S,Alive);
+	claim(S,Weakagree);
+	}
+
+	role C{
+	secret PreLogin, PrePass;
+	var Ci, Sid, Rs1, Rs2;
+
+	send_1(C, S, HELLO);
+	recv_2(S, C, { Ci }kir);
+	send_3(C, S, { Ri }kir);
+	recv_4(S, C, { Sid }kir);
+	send_5(C, S, KeyAccess);
+	recv_6(S, C, CLog, CPass, Cid);
+
+	claim(C,Niagree);
+	claim(C,Nisynch);
+	claim(C,Alive);
+	claim(C,Weakagree);
+	}
+}

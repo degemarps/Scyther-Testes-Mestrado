@@ -1,0 +1,39 @@
+hashfunction H;
+usertype String;
+
+const kir:Function;
+
+const CONNECT:String;
+const OK:String;
+
+protocol autorizacao (S, C) {
+	role S{
+	secret Sid, Ci, Ri, Id, Password, Login;
+
+	recv_1(C, S, {Sid}kir, CONNECT);
+	send_2(S, C, {Ci}kir);
+	recv_3(C, S, {Ri}kir);
+	send_4(S, C, OK);
+	recv_5(C, S, H(Id, Password, Login));
+
+	claim(S,Niagree);
+	claim(S,Nisynch);
+	claim(S,Alive);
+	claim(S,Weakagree);
+	}
+
+	role C{
+	secret Sid, Ci, Ri, Id, Password, Login;
+
+	send_1(C, S, {Sid}kir, CONNECT);
+	recv_2(S, C, {Ci}kir);
+	send_3(C, S, {Ri}kir);
+	recv_4(S, C, OK);
+	send_5(C, S, H(Id, Password, Login));
+
+	claim(C,Niagree);
+	claim(C,Nisynch);
+	claim(C,Alive);
+	claim(C,Weakagree);
+	}
+}
